@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os 
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,15 +22,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = 'django-insecure-^jsehedb$t02(tf#^dff#)+ob$242wu7)#o_i3&t5nr02_il26'
+# Use a default key for local development, but Render will override this with an env var
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-^jsehedb$t02(tf#^dff#)+ob$242wu7)#o_i3&t5nr02_il26")
 
-# # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
+# SECURITY WARNING: don't run with debug turned on in production!
+# Fix: lower() == "true" (lowercase) for correct comparison
+DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
-# ALLOWED_HOSTS = []
-SECRET_KEY=os.environ.get("SECRET_KEY")
-DEBUG =os.environ.get("DEBUG","False").lower()=="True"
-ALLOWED_HOSTS=os.environ.get("ALLOWED_HOSTS").split(" ")
+# Fix: Provide a default list to prevent split() from failing if env var is missing
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost 127.0.0.1 .onrender.com").split(" ")
 
 # Application definition
 
@@ -48,7 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whiteoise.middleware.WhiteoiseMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -82,10 +83,11 @@ WSGI_APPLICATION = 'blogApp.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        # Standard default for local development using SQLite
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600
+    )
 }
 
 
