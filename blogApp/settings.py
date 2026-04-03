@@ -29,8 +29,12 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-^jsehedb$t02(tf#^dff#
 # Fix: lower() == "true" (lowercase) for correct comparison
 DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 
-# Fix: Provide a default list to prevent split() from failing if env var is missing
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost 127.0.0.1 .onrender.com blogapp-jmxy.onrender.com").split()
+# Fix: Robust handling for ALLOWED_HOSTS even if the env var is empty
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS")
+if ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ALLOWED_HOSTS.split()
+else:
+    ALLOWED_HOSTS = ["localhost", "127.0.0.1", ".onrender.com", "blogapp-jmxy.onrender.com", "*"]
 
 # Application definition
 
